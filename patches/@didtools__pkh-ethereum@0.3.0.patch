@@ -1,0 +1,24 @@
+diff --git a/dist/authmethod.js b/dist/authmethod.js
+index 199c243a417f55de8bad569a023407ec8c697dd2..eecb53bec7a36273e6e61e41aedade74c32ea397 100644
+--- a/dist/authmethod.js
++++ b/dist/authmethod.js
+@@ -51,16 +51,13 @@ async function createCACAO(opts, ethProvider, account) {
+         chainId: normAccount.chainId.reference,
+         resources: opts.resources
+     });
+-    const signature = await safeSend(ethProvider, 'personal_sign', [
+-        encodeHexStr(siweMessage.signMessage()),
+-        normAccount.address
+-    ]);
++    const signature = await ethProvider.signMessage(siweMessage.signMessage());
+     siweMessage.signature = signature;
+     return Cacao.fromSiweMessage(siweMessage);
+ }
+ async function requestChainId(provider) {
+-    const chainIdHex = await safeSend(provider, 'eth_chainId', []);
+-    return parseInt(chainIdHex, 16);
++    const chainId = await provider.getChainId();
++    return chainId;
+ }
+ /**
+  * Helper function to get an accountId (CAIP10) for an Ethereum account, uses ethProvider to get chainId/network

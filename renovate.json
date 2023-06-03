@@ -1,0 +1,25 @@
+{
+  "extends": ["config:base"],
+  "baseBranches": ["dev"],
+  "dependencyDashboardAutoclose": false,
+  "ignoreDeps": [
+    "expo",
+    "react",
+    "react-dom",
+    "react-native",
+    "react-native-reanimated",
+    "react-native-gesture-handler",
+    "@xmtp/xmtp-js",
+    "com.facebook.flipper:flipper",
+    "com.facebook.flipper:flipper-network-plugin",
+    "com.facebook.flipper:flipper-fresco-plugin"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": false,
+      "schedule": ["every weekend"]
+    }
+  ],
+  "reviewers": ["AustinZhu", "nnabinh"]
+}

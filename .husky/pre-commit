@@ -1,0 +1,9 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+
+pnpm --silent dlx sort-package-json
+git add package.json
+
+pnpm run lint-staged
