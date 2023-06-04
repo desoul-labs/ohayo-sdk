@@ -6,17 +6,17 @@ import {
   UseMutationOptions,
   useMutation,
 } from '@tanstack/react-query';
-import { U } from 'ts-toolbelt';
+import { DocumentContent } from 'src/ceramic/types/shared';
 import { useCeramicContext } from '../useCeramicContext';
 
 export type UseCreateDocumentArgs = TileMetadataArgs &
   Partial<{
-    content: U.Nullable<Record<string, any>>;
+    content: DocumentContent;
     opts: CreateOpts;
   }>;
 
 export type CreateDocumentResult = {
-  document: TileDocument<U.Nullable<Record<string, any>>>;
+  document: TileDocument<DocumentContent>;
 };
 
 export type UseCreateDocumentConfig = UseMutationOptions<
@@ -37,12 +37,7 @@ const mutationFn: MutationFunction<
   MutationArgs
 > = async ({ client, content, opts, ...metadata }) => {
   return {
-    document: await TileDocument.create<Record<string, any>>(
-      client,
-      content,
-      metadata,
-      opts,
-    ),
+    document: await TileDocument.create(client, content, metadata, opts),
   };
 };
 
@@ -72,7 +67,7 @@ export const useCreateDocument = ({
   );
 
   const create = (
-    content_: U.Nullable<Record<string, any>>,
+    content_: DocumentContent,
     metadata?: TileMetadataArgs,
     options?: CreateOpts,
   ) =>
@@ -88,7 +83,7 @@ export const useCreateDocument = ({
     });
 
   const createAsync = async (
-    content_: U.Nullable<Record<string, any>>,
+    content_: DocumentContent,
     metadata?: TileMetadataArgs,
     options?: CreateOpts,
   ) =>

@@ -5,14 +5,12 @@ import {
   UseMutationOptions,
   useMutation,
 } from '@tanstack/react-query';
-import { U } from 'ts-toolbelt';
+import { DocumentContent } from 'src/ceramic/types/shared';
 
 export type UseUpdateDocumentArgs = {
-  document: TileDocument<U.Nullable<Record<string, any>>>;
+  document: TileDocument<DocumentContent>;
 } & Partial<{
-  setContent: (
-    content: U.Nullable<Record<string, any>>,
-  ) => U.Nullable<Record<string, any>>;
+  setContent: (content: DocumentContent) => DocumentContent;
   setMetadata: (metadata: TileMetadataArgs) => TileMetadataArgs | undefined;
   opts: UpdateOpts;
 }>;
@@ -59,9 +57,7 @@ export const useUpdateDocument = ({
   );
 
   const update = (
-    setContent_: (
-      content: U.Nullable<Record<string, any>>,
-    ) => U.Nullable<Record<string, any>>,
+    setContent_: (content: DocumentContent) => DocumentContent,
     setMetadata_: (metadata: TileMetadataArgs) => TileMetadataArgs | undefined,
     options?: UpdateOpts,
   ) =>
@@ -73,9 +69,7 @@ export const useUpdateDocument = ({
     });
 
   const updateAsync = async (
-    setContent_: (
-      content: U.Nullable<Record<string, any>>,
-    ) => U.Nullable<Record<string, any>>,
+    setContent_: (content: DocumentContent) => DocumentContent,
     setMetadata_: (metadata: TileMetadataArgs) => TileMetadataArgs | undefined,
     options?: UpdateOpts,
   ) =>

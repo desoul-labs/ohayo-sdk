@@ -4,7 +4,6 @@ import { BigNumberish, Contract, providers } from 'ethers';
 import { useCallback, useEffect, useState } from 'react';
 import { erc20, erc721 } from 'src/walletconnect/constants/abi';
 import { useProvider } from '../provider/useProvider';
-import { useEthersWallet } from '../useWalletConnect';
 
 export const useTransaction = ({ txHash }: { txHash: string }) => {
   const { data } = useProvider();
@@ -33,7 +32,6 @@ export const useTransaction = ({ txHash }: { txHash: string }) => {
 
 export const useSendTransaction = () => {
   const connector = useWalletConnect();
-  const wallet = useEthersWallet();
 
   const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -45,18 +43,12 @@ export const useSendTransaction = () => {
   const sendTransaction = useCallback(
     async (
       tx: providers.TransactionRequest = {
-        from: wallet ? wallet.address : connector.accounts[0],
+        from: connector.accounts[0],
       },
     ) => {
       setIsPending(true);
       try {
-        let hash: string;
-        if (wallet) {
-          const resp = await wallet.sendTransaction(tx);
-          hash = resp.hash;
-        } else {
-          hash = await connector.sendTransaction(convertTx(tx));
-        }
+        const hash = await connector.sendTransaction(convertTx(tx));
         setTxHash(hash);
 
         setIsSuccess(true);
@@ -70,7 +62,7 @@ export const useSendTransaction = () => {
         setIsPending(false);
       }
     },
-    [wallet, connector],
+    [connector],
   );
 
   return {
@@ -111,7 +103,6 @@ export const useWaitForTransaction = (hash: string) => {
 
 export const useTransfer = () => {
   const connector = useWalletConnect();
-  const wallet = useEthersWallet();
 
   const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -125,26 +116,16 @@ export const useTransfer = () => {
       to: string,
       amount: BigNumberish,
       overrides: Omit<providers.TransactionRequest, 'to' | 'value'> = {
-        from: wallet ? wallet.address : connector.accounts[0],
+        from: connector.accounts[0],
       },
     ) => {
       setIsPending(true);
       try {
-        let hash: string;
-        if (wallet) {
-          const resp = await wallet.sendTransaction({
-            to,
-            value: amount,
-            ...overrides,
-          });
-          hash = resp.hash;
-        } else {
-          hash = await connector.sendTransaction({
-            to,
-            value: amount.toString(),
-            ...convertTx(overrides),
-          });
-        }
+        const hash = await connector.sendTransaction({
+          to,
+          value: amount.toString(),
+          ...convertTx(overrides),
+        });
         setTxHash(hash);
 
         setIsSuccess(true);
@@ -158,7 +139,7 @@ export const useTransfer = () => {
         setIsPending(false);
       }
     },
-    [connector, wallet],
+    [connector],
   );
 
   return {
@@ -173,7 +154,6 @@ export const useTransfer = () => {
 
 export const useERC20Transfer = ({ address }: { address: string }) => {
   const connector = useWalletConnect();
-  const wallet = useEthersWallet();
   const contract = new Contract(address, erc20);
 
   const [error, setError] = useState<Error | null>(null);
@@ -186,7 +166,7 @@ export const useERC20Transfer = ({ address }: { address: string }) => {
     to: string,
     amount: string,
     overrides: Omit<providers.TransactionRequest, 'to' | 'data'> = {
-      from: wallet ? wallet.address : connector.accounts[0],
+      from: connector.accounts[0],
     },
   ) => {
     setIsPending(true);
@@ -196,21 +176,11 @@ export const useERC20Transfer = ({ address }: { address: string }) => {
         amount,
       ]);
 
-      let hash: string;
-      if (wallet) {
-        const resp = await wallet.sendTransaction({
-          to: address,
-          data,
-          ...overrides,
-        });
-        hash = resp.hash;
-      } else {
-        hash = await connector.sendTransaction({
-          to: address,
-          data,
-          ...convertTx(overrides),
-        });
-      }
+      const hash = await connector.sendTransaction({
+        to: address,
+        data,
+        ...convertTx(overrides),
+      });
       setTxHash(hash);
 
       setIsSuccess(true);
@@ -237,7 +207,6 @@ export const useERC20Transfer = ({ address }: { address: string }) => {
 
 export const useERC721Transfer = ({ address }: { address: string }) => {
   const connector = useWalletConnect();
-  const wallet = useEthersWallet();
   const contract = new Contract(address, erc721);
 
   const [error, setError] = useState<Error | null>(null);
@@ -250,7 +219,7 @@ export const useERC721Transfer = ({ address }: { address: string }) => {
     to: string,
     tokenId: string,
     overrides: Omit<providers.TransactionRequest, 'to' | 'data'> = {
-      from: wallet ? wallet.address : connector.accounts[0],
+      from: connector.accounts[0],
     },
   ) => {
     setIsPending(true);
@@ -261,21 +230,11 @@ export const useERC721Transfer = ({ address }: { address: string }) => {
         tokenId,
       ]);
 
-      let hash: string;
-      if (wallet) {
-        const resp = await wallet.sendTransaction({
-          to: address,
-          data,
-          ...overrides,
-        });
-        hash = resp.hash;
-      } else {
-        hash = await connector.sendTransaction({
-          to: address,
-          data,
-          ...convertTx(overrides),
-        });
-      }
+      const hash = await connector.sendTransaction({
+        to: address,
+        data,
+        ...convertTx(overrides),
+      });
       setTxHash(hash);
 
       setIsSuccess(true);

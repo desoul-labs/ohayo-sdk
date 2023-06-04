@@ -5,13 +5,12 @@ import {
 } from '@tanstack/react-query';
 import _ from 'lodash';
 import { useContext } from 'react';
+import { ENDPOINT_URL } from 'src/stable-diffusion/config/endpoint';
+import { StableDiffusionContext } from 'src/stable-diffusion/context/StableDiffusionContext';
+import { GenerationParameter } from 'src/stable-diffusion/types/shared';
 import { z } from 'zod';
-import { ENDPOINT_URL } from '../config/endpoint';
-import { StableDiffusionContext } from '../context/StableDiffusionContext';
-import { GenerationParameter } from '../types/shared';
 
 const schema = z.object({
-  initImage: z.string().url(),
   prompt: z.string(),
   negativePrompt: z.string().nullable().default(null).optional(),
   width: z
@@ -44,40 +43,60 @@ const schema = z.object({
     .optional(),
   seed: z.number().int().nullish().default(null).optional(),
   guidanceScale: z.number().gte(1).lte(20).default(7.5).optional(),
-  strength: z.number().gte(0).lte(1).default(0.7).optional(),
+  multiLingual: z
+    .boolean()
+    .default(false)
+    .transform(val => (val ? 'yes' : 'no'))
+    .optional(),
+  panorama: z
+    .boolean()
+    .default(false)
+    .transform(val => (val ? 'yes' : 'no'))
+    .optional(),
+  selfAttention: z
+    .boolean()
+    .default(false)
+    .transform(val => (val ? 'yes' : 'no'))
+    .optional(),
+  upscale: z
+    .boolean()
+    .default(false)
+    .transform(val => (val ? 'yes' : 'no'))
+    .optional(),
+  embeddingsModel: z.string().nullish().default(null).optional(),
 });
-export type UseImage2ImageArgs = z.infer<typeof schema>;
+export type UseText2ImageArgs = z.infer<typeof schema>;
 
-export type Image2ImageResult = {
+export type Text2ImageResult = {
   status: 'success' | 'processing' | 'error';
   generationTime?: number;
   eta?: number;
   id: string;
   output: string[];
   meta: GenerationParameter;
-  fetchResult?: () => Promise<Image2ImageResult>;
+  fetchResult?: () => Promise<Text2ImageResult>;
 };
 
-export type UseImage2ImageConfig = UseQueryOptions<
-  Image2ImageResult,
+export type UseText2ImageConfig = UseQueryOptions<
+  Text2ImageResult,
   Error,
-  Image2ImageResult,
+  Text2ImageResult,
   ReturnType<typeof queryKey>
 >;
 
-type QueryArgs = UseImage2ImageArgs & {
+type QueryArgs = UseText2ImageArgs & {
   apiKey: string;
 };
 
 const queryKey = (args: QueryArgs) =>
-  ['stable-diffusion', 'image2image', args] as const;
+  ['stable-diffusion', 'text2image', args] as const;
 
 const queryFn: QueryFunction<
-  Image2ImageResult,
+  Text2ImageResult,
   ReturnType<typeof queryKey>
 > = async ({ queryKey: [, , { apiKey, ...opts }] }) => {
   const validated = schema.parse(opts);
-  const response = await fetch(`${ENDPOINT_URL}/img2img`, {
+  const response = await fetch(`${ENDPOINT_URL}/text2image`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -102,25 +121,24 @@ const queryFn: QueryFunction<
     });
     const res_ = JSON.parse(await resp_.text(), key => _.camelCase(key));
     res_.meta = res.meta;
-    return res_ as Image2ImageResult;
+    return res_ as Text2ImageResult;
   };
 
   switch (res.status) {
     case 'error':
       throw new Error(res.message);
     case 'success':
-      return res as Image2ImageResult;
+      return res as Text2ImageResult;
     case 'processing':
       res.fetchResult = fetchResult;
-      return res as Image2ImageResult;
+      return res as Text2ImageResult;
   }
 
   throw new Error('Unknown response');
 };
 
-export const useImage2Image = ({
+export const useText2Image = ({
   prompt,
-  initImage,
   negativePrompt,
   width,
   height,
@@ -130,14 +148,17 @@ export const useImage2Image = ({
   enhancePrompt,
   seed,
   guidanceScale,
-  strength,
+  multiLingual,
+  panorama,
+  selfAttention,
+  upscale,
+  embeddingsModel,
   ...config
-}: UseImage2ImageArgs & UseImage2ImageConfig) => {
+}: UseText2ImageArgs & UseText2ImageConfig) => {
   const { apiKey } = useContext(StableDiffusionContext);
 
   const qryKey = queryKey({
     apiKey,
-    initImage,
     prompt,
     negativePrompt,
     width,
@@ -148,7 +169,11 @@ export const useImage2Image = ({
     enhancePrompt,
     seed,
     guidanceScale,
-    strength,
+    multiLingual,
+    panorama,
+    selfAttention,
+    upscale,
+    embeddingsModel,
   });
   const query = useQuery(qryKey, queryFn, config);
 

@@ -7,6 +7,7 @@ import {
   UseQueryOptions,
   useQuery,
 } from '@tanstack/react-query';
+import { DocumentContent } from 'src/ceramic/types/shared';
 import { useCeramicContext } from '../useCeramicContext';
 
 export type UseDocumentArgs = {
@@ -15,7 +16,7 @@ export type UseDocumentArgs = {
 };
 
 export type DocumentResult = {
-  document: TileDocument<Record<string, any> | null>;
+  document: TileDocument<DocumentContent>;
 };
 
 export type UseDocumentConfig = UseQueryOptions<
@@ -36,11 +37,7 @@ const queryFn: QueryFunction<
   ReturnType<typeof queryKey>
 > = async ({ queryKey: [, , { client, streamId, opts }] }) => {
   return {
-    document: await TileDocument.load<Record<string, any> | null>(
-      client,
-      streamId,
-      opts,
-    ),
+    document: await TileDocument.load(client, streamId, opts),
   };
 };
 

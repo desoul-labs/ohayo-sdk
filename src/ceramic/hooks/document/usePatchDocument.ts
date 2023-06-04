@@ -6,10 +6,10 @@ import {
   useMutation,
 } from '@tanstack/react-query';
 import { Operation } from 'fast-json-patch';
-import { U } from 'ts-toolbelt';
+import { DocumentContent } from 'src/ceramic/types/shared';
 
 export type UsePatchDocumentArgs = {
-  document: TileDocument<U.Nullable<Record<string, any>>>;
+  document: TileDocument<DocumentContent>;
 } & Partial<{
   operations: Operation[];
   opts: UpdateOpts;

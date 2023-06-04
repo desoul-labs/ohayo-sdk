@@ -4,16 +4,13 @@ import {
   SessionKeyPair,
   SessionSigsMap,
 } from '@lit-protocol/types';
-import { Signer } from 'ethers';
 import { createContext } from 'react';
+import { O } from 'ts-toolbelt';
 
-export type InitClientOptions = Omit<
+export type InitClientOptions = O.Undefinable<
   GetSessionSigsProps,
   'expiration' | 'sessionKey'
-> & {
-  expiration?: string;
-  sessionKey?: SessionKeyPair;
-};
+>;
 
 export type InitClientResults = {
   client: LitNodeClient;
@@ -22,17 +19,16 @@ export type InitClientResults = {
 
 export type LitContextValue = {
   client?: LitNodeClient | undefined;
-  initClient: (
-    signer: Signer,
-    options: InitClientOptions,
-  ) => Promise<InitClientResults | undefined>;
-  closeClient: () => Promise<void>;
   sessionSigs?: SessionSigsMap;
+  setSessionSigs: (sessionSigs?: SessionSigsMap) => void;
+  sessionKey?: SessionKeyPair;
+  setSessionKey: (sessionKey?: SessionKeyPair) => void;
 };
 
 export const LitContext = createContext<LitContextValue>({
   client: undefined,
-  initClient: () => Promise.resolve(undefined),
-  closeClient: () => Promise.resolve(undefined),
   sessionSigs: undefined,
+  setSessionSigs: () => {},
+  sessionKey: undefined,
+  setSessionKey: () => {},
 });

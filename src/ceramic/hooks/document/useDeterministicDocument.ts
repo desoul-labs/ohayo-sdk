@@ -6,6 +6,7 @@ import {
   UseMutationOptions,
   useMutation,
 } from '@tanstack/react-query';
+import { DocumentContent } from 'src/ceramic/types/shared';
 import { useCeramicContext } from '../useCeramicContext';
 
 export type UseDeterministicDocumentArgs = Omit<
@@ -14,7 +15,7 @@ export type UseDeterministicDocumentArgs = Omit<
 > & { opts?: CreateOpts };
 
 export type DeterministicDocumentResult = {
-  document: TileDocument<Record<string, any>>;
+  document: TileDocument<DocumentContent>;
 };
 
 export type UseDeterministicDocumentConfig = UseMutationOptions<
@@ -35,7 +36,7 @@ const mutationFn: MutationFunction<
   MutationArgs
 > = async ({ client, opts, ...metadata }) => {
   return {
-    document: await TileDocument.deterministic<Record<string, any>>(
+    document: await TileDocument.deterministic<DocumentContent>(
       client,
       metadata,
       opts,

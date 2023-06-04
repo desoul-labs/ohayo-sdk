@@ -5,9 +5,9 @@ import {
 } from '@tanstack/react-query';
 import _ from 'lodash';
 import { useContext } from 'react';
+import { ENDPOINT_URL } from 'src/stable-diffusion/config/endpoint';
+import { StableDiffusionContext } from 'src/stable-diffusion/context/StableDiffusionContext';
 import { z } from 'zod';
-import { ENDPOINT_URL } from '../config/endpoint';
-import { StableDiffusionContext } from '../context/StableDiffusionContext';
 
 const schema = z.object({
   url: z.string().url(),

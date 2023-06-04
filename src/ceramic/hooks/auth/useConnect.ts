@@ -7,12 +7,16 @@ import {
 } from '@tanstack/react-query';
 import { DIDSession } from 'did-session';
 import { Signer } from 'ethers';
+import { U } from 'ts-toolbelt';
 import { useCeramicContext } from '../useCeramicContext';
+
+export type ConnectOptions = {
+  session?: string | DIDSession;
+} & U.NonNullable<Parameters<typeof DIDSession.authorize>[1]>;
 
 export type UseConnectArgs = Partial<{
   signer: Signer;
-  session: string | DIDSession;
-  opts: Parameters<typeof DIDSession.authorize>[1];
+  opts: ConnectOptions;
 }>;
 
 export type ConnectResult = {
@@ -34,15 +38,14 @@ const mutationKey = (args: MutationArgs) =>
 
 const mutationFn: MutationFunction<ConnectResult, MutationArgs> = async ({
   client,
-  session,
   signer,
   opts,
 }) => {
-  if (session) {
+  if (opts?.session) {
     const didSession =
-      typeof session === 'string'
-        ? await DIDSession.fromSession(session)
-        : session;
+      typeof opts.session === 'string'
+        ? await DIDSession.fromSession(opts.session)
+        : opts.session;
     if (didSession.hasSession && !didSession.isExpired) {
       client.setDID(didSession.did);
       return {
@@ -67,18 +70,19 @@ const mutationFn: MutationFunction<ConnectResult, MutationArgs> = async ({
 };
 
 export const useConnect = ({
-  signer: argsSigner,
-  session,
+  signer,
   opts,
   ...config
 }: UseConnectArgs & UseConnectConfig = {}) => {
-  const { client, session: savedSession, setSession } = useCeramicContext();
+  const { client, session, setSession } = useCeramicContext();
 
   const mutKey = mutationKey({
     client,
-    signer: argsSigner,
-    session: session ?? savedSession,
-    opts,
+    signer,
+    opts: {
+      session,
+      ...opts,
+    },
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(mutKey, mutationFn, {
     ...config,
@@ -90,26 +94,26 @@ export const useConnect = ({
     },
   });
 
-  const connect = (
-    signer?: Signer,
-    options?: Parameters<typeof DIDSession.authorize>[1],
-  ) =>
+  const connect = (signer_?: Signer, options?: ConnectOptions) =>
     mutate({
       client,
-      session: session ?? savedSession,
-      signer: argsSigner ?? signer,
-      opts: opts ?? options,
+      signer: signer ?? signer_,
+      opts: {
+        session,
+        ...options,
+        ...opts,
+      },
     });
 
-  const connectAsync = async (
-    signer?: Signer,
-    options?: Parameters<typeof DIDSession.authorize>[1],
-  ) =>
+  const connectAsync = async (signer_?: Signer, options?: ConnectOptions) =>
     await mutateAsync({
       client,
-      session: session ?? savedSession,
-      signer: argsSigner ?? signer,
-      opts: opts ?? options,
+      signer: signer ?? signer_,
+      opts: {
+        session,
+        ...options,
+        ...opts,
+      },
     });
 
   return {
