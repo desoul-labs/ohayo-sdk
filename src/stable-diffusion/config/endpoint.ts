@@ -1,1 +1,1 @@
-export const ENDPOINT_URL = 'https://stablediffusionapi.com/api/v3';
+export const ENDPOINT_URL = 'https://stablediffusionapi.com/api';

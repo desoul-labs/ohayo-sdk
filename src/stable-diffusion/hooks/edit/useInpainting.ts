@@ -7,62 +7,21 @@ import _ from 'lodash';
 import { useContext } from 'react';
 import { ENDPOINT_URL } from 'src/stable-diffusion/config/endpoint';
 import { StableDiffusionContext } from 'src/stable-diffusion/context/StableDiffusionContext';
-import { GenerationParameter } from 'src/stable-diffusion/types/shared';
+import { PredictionResult } from 'src/stable-diffusion/types/shared';
 import { z } from 'zod';
+import { sharedSchema } from '../../constants/schema';
 
-const schema = z.object({
+const schema = sharedSchema.extend({
   initImage: z.string().url(),
   maskImage: z.string().url(),
-  prompt: z.string(),
-  negativePrompt: z.string().nullable().default(null).optional(),
-  width: z
-    .number()
-    .int()
-    .gte(8)
-    .lte(1024)
-    .multipleOf(8)
-    .default(512)
-    .optional(),
-  height: z
-    .number()
-    .int()
-    .gte(8)
-    .lte(1024)
-    .multipleOf(8)
-    .default(512)
-    .optional(),
-  samples: z.number().int().gte(1).lte(4).default(1).optional(),
-  numInferenceSteps: z.enum(['20', '30', '40', '50']).default('20').optional(),
-  safetyChecker: z
-    .boolean()
-    .default(false)
-    .transform(val => (val ? 'yes' : 'no'))
-    .optional(),
-  enhancePrompt: z
-    .boolean()
-    .default(false)
-    .transform(val => (val ? 'yes' : 'no'))
-    .optional(),
-  seed: z.number().int().nullish().default(null).optional(),
-  guidanceScale: z.number().gte(1).lte(20).default(7.5).optional(),
   strength: z.number().gte(0).lte(1).default(0.7).optional(),
 });
 export type UseInpaintingArgs = z.infer<typeof schema>;
 
-export type InpaintingResult = {
-  status: 'success' | 'processing' | 'error';
-  generationTime?: number;
-  eta?: number;
-  id: string;
-  output: string[];
-  meta: GenerationParameter;
-  fetchResult?: () => Promise<InpaintingResult>;
-};
-
 export type UseInpaintingConfig = UseQueryOptions<
-  InpaintingResult,
+  PredictionResult,
   Error,
-  InpaintingResult,
+  PredictionResult,
   ReturnType<typeof queryKey>
 >;
 
@@ -74,11 +33,11 @@ const queryKey = (args: QueryArgs) =>
   ['stable-diffusion', 'inpainting', args] as const;
 
 const queryFn: QueryFunction<
-  InpaintingResult,
+  PredictionResult,
   ReturnType<typeof queryKey>
 > = async ({ queryKey: [, , { apiKey, ...opts }] }) => {
   const validated = schema.parse(opts);
-  const response = await fetch(`${ENDPOINT_URL}/inpaint`, {
+  const response = await fetch(`${ENDPOINT_URL}/v4/dreambooth/inpaint`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -87,42 +46,25 @@ const queryFn: QueryFunction<
       _.snakeCase(key),
     ),
   });
-
   if (!response.ok) {
     throw new Error(response.statusText);
   }
 
   const res = JSON.parse(await response.text(), key => _.camelCase(key));
-  const fetchResult = async () => {
-    const resp_ = await fetch(`${ENDPOINT_URL}/fetch/${res.id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ key: apiKey }),
-    });
-    const res_ = JSON.parse(await resp_.text(), key => _.camelCase(key));
-    res_.meta = res.meta;
-    return res_ as InpaintingResult;
-  };
-
   switch (res.status) {
+    case 'success':
+    case 'processing':
+      return res as PredictionResult;
     case 'error':
       throw new Error(res.message);
-    case 'success':
-      return res as InpaintingResult;
-    case 'processing':
-      res.fetchResult = fetchResult;
-      return res as InpaintingResult;
   }
 
   throw new Error('Unknown response');
 };
 
 export const useInpainting = ({
+  modelId,
   prompt,
-  initImage,
-  maskImage,
   negativePrompt,
   width,
   height,
@@ -132,6 +74,13 @@ export const useInpainting = ({
   enhancePrompt,
   seed,
   guidanceScale,
+  tomesd,
+  useKarrasSigmas,
+  vae,
+  loraModel,
+  loraStrength,
+  initImage,
+  maskImage,
   strength,
   ...config
 }: UseInpaintingArgs & UseInpaintingConfig) => {
@@ -139,8 +88,7 @@ export const useInpainting = ({
 
   const qryKey = queryKey({
     apiKey,
-    initImage,
-    maskImage,
+    modelId,
     prompt,
     negativePrompt,
     width,
@@ -151,6 +99,13 @@ export const useInpainting = ({
     enhancePrompt,
     seed,
     guidanceScale,
+    tomesd,
+    useKarrasSigmas,
+    vae,
+    loraModel,
+    loraStrength,
+    initImage,
+    maskImage,
     strength,
   });
   const query = useQuery(qryKey, queryFn, config);
