@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/react-native/tsconfig.json",
   "compilerOptions": {
+    "strictNullChecks": true,
     "lib": ["dom", "esnext"],
     "baseUrl": "."
   },

@@ -1,6 +1,6 @@
 import { S3, S3ClientConfig } from '@aws-sdk/client-s3';
 import { useMemo } from 'react';
-import { FourEverLandContext } from 'src/contexts/4EverlandContext';
+import { FourEverLandContext } from 'src/4everland/contexts/4EverlandContext';
 
 export type FourEverLandProviderProps = S3ClientConfig;
 

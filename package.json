@@ -1,5 +1,5 @@
 {
-  "name": "ohayo-core",
+  "name": "@desoul-labs/ohayo-sdk",
   "version": "0.1.0",
   "private": true,
   "exports": {
@@ -24,8 +24,8 @@
     "publish": "pnpm run build && pnpm publish",
     "release": "standard-version -a",
     "release:ci": "standard-version --dry-run",
-    "test": "jest --watchAll",
-    "test:ci": "jest --ci --coverage"
+    "test": "jest --watchAll --passWithNoTests",
+    "test:ci": "jest --ci --coverage --passWithNoTests"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [
@@ -85,6 +85,7 @@
     "safe-buffer": "5.2.1",
     "siwe": "2.1.4",
     "text-encoding": "0.7.0",
+    "ts-toolbelt": "^9.6.0",
     "web-streams-polyfill": "3.2.1"
   },
   "devDependencies": {

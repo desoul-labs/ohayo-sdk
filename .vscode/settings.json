@@ -22,7 +22,7 @@
   "editor.formatOnSave": true,
   "prettier.trailingComma": "all",
   "files.exclude": {
-    // "node_modules/": true,
+    "node_modules/": true,
     "dist/": true,
     "coverage/": true,
     "generated/": true,
