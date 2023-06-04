@@ -12,6 +12,7 @@ import { GenerationParameter } from '../types/shared';
 
 const schema = z.object({
   initImage: z.string().url(),
+  maskImage: z.string().url(),
   prompt: z.string(),
   negativePrompt: z.string().nullable().default(null).optional(),
   width: z
@@ -46,38 +47,38 @@ const schema = z.object({
   guidanceScale: z.number().gte(1).lte(20).default(7.5).optional(),
   strength: z.number().gte(0).lte(1).default(0.7).optional(),
 });
-export type UseImage2ImageArgs = z.infer<typeof schema>;
+export type UseInpaintingArgs = z.infer<typeof schema>;
 
-export type Image2ImageResult = {
+export type InpaintingResult = {
   status: 'success' | 'processing' | 'error';
   generationTime?: number;
   eta?: number;
   id: string;
   output: string[];
   meta: GenerationParameter;
-  fetchResult?: () => Promise<Image2ImageResult>;
+  fetchResult?: () => Promise<InpaintingResult>;
 };
 
-export type UseImage2ImageConfig = UseQueryOptions<
-  Image2ImageResult,
+export type UseInpaintingConfig = UseQueryOptions<
+  InpaintingResult,
   Error,
-  Image2ImageResult,
+  InpaintingResult,
   ReturnType<typeof queryKey>
 >;
 
-type QueryArgs = UseImage2ImageArgs & {
+type QueryArgs = UseInpaintingArgs & {
   apiKey: string;
 };
 
 const queryKey = (args: QueryArgs) =>
-  ['stable-diffusion', 'image2image', args] as const;
+  ['stable-diffusion', 'inpainting', args] as const;
 
 const queryFn: QueryFunction<
-  Image2ImageResult,
+  InpaintingResult,
   ReturnType<typeof queryKey>
 > = async ({ queryKey: [, , { apiKey, ...opts }] }) => {
   const validated = schema.parse(opts);
-  const response = await fetch(`${ENDPOINT_URL}/img2img`, {
+  const response = await fetch(`${ENDPOINT_URL}/inpaint`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -102,25 +103,26 @@ const queryFn: QueryFunction<
     });
     const res_ = JSON.parse(await resp_.text(), key => _.camelCase(key));
     res_.meta = res.meta;
-    return res_ as Image2ImageResult;
+    return res_ as InpaintingResult;
   };
 
   switch (res.status) {
     case 'error':
       throw new Error(res.message);
     case 'success':
-      return res as Image2ImageResult;
+      return res as InpaintingResult;
     case 'processing':
       res.fetchResult = fetchResult;
-      return res as Image2ImageResult;
+      return res as InpaintingResult;
   }
 
   throw new Error('Unknown response');
 };
 
-export const useImage2Image = ({
+export const useInpainting = ({
   prompt,
   initImage,
+  maskImage,
   negativePrompt,
   width,
   height,
@@ -132,12 +134,13 @@ export const useImage2Image = ({
   guidanceScale,
   strength,
   ...config
-}: UseImage2ImageArgs & UseImage2ImageConfig) => {
+}: UseInpaintingArgs & UseInpaintingConfig) => {
   const { apiKey } = useContext(StableDiffusionContext);
 
   const qryKey = queryKey({
     apiKey,
     initImage,
+    maskImage,
     prompt,
     negativePrompt,
     width,
