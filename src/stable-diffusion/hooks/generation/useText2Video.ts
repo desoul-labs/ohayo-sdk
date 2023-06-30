@@ -5,11 +5,11 @@ import {
 } from '@tanstack/react-query';
 import _ from 'lodash';
 import { useContext } from 'react';
-import { ENDPOINT_URL } from 'src/stable-diffusion/config/endpoint';
-import { sharedSchema } from 'src/stable-diffusion/constants/schema';
-import { StableDiffusionContext } from 'src/stable-diffusion/context/StableDiffusionContext';
-import { PredictionResult } from 'src/stable-diffusion/types/shared';
 import { z } from 'zod';
+import { ENDPOINT_URL } from '../../config/endpoint';
+import { sharedSchema } from '../../constants/schema';
+import { StableDiffusionContext } from '../../context/StableDiffusionContext';
+import { PredictionResult } from '../../types/shared';
 
 const schema = sharedSchema.extend({
   strength: z.number().gte(0).lte(1).default(0.7).optional(),

@@ -7,7 +7,7 @@ import {
   UseQueryOptions,
   useQuery,
 } from '@tanstack/react-query';
-import { DocumentContent } from 'src/ceramic/types/shared';
+import { DocumentContent } from '../../types/shared';
 import { useCeramicContext } from '../useCeramicContext';
 
 export type UseDocumentArgs = {

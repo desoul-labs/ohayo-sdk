@@ -7,7 +7,7 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 import { useCallback, useContext, useState } from 'react';
-import { LitContext } from 'src/lit/contexts/LitContext';
+import { LitContext } from '../../contexts/LitContext';
 
 export type UseAccessControlOptions = {
   chain: string;

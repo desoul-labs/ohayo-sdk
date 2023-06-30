@@ -1,5 +1,5 @@
 import { useCallback, useContext, useState } from 'react';
-import { LitContext } from 'src/lit/contexts/LitContext';
+import { LitContext } from '../../contexts/LitContext';
 
 export type UseLitActionsOptions = Partial<{
   ipfsId: string;

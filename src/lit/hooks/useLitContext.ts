@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { LitContext } from 'src/lit/contexts/LitContext';
+import { LitContext } from '../contexts/LitContext';
 
 export const useLitContext = () => {
   const { client, setSessionSigs, sessionSigs, setSessionKey, sessionKey } =

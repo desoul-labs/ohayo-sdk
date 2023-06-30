@@ -4,7 +4,7 @@ import { PKPPermissions } from '@lit-protocol/contracts-sdk/src/abis/PKPPermissi
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { ContractTransaction, Signer } from 'ethers';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { LitContext } from 'src/lit/contexts/LitContext';
+import { LitContext } from '../../contexts/LitContext';
 
 export const useMintPKP = () => {
   const [isPending, setIsPending] = useState(false);

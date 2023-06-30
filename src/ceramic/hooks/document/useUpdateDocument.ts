@@ -5,7 +5,7 @@ import {
   UseMutationOptions,
   useMutation,
 } from '@tanstack/react-query';
-import { DocumentContent } from 'src/ceramic/types/shared';
+import { DocumentContent } from '../../types/shared';
 
 export type UseUpdateDocumentArgs = {
   document: TileDocument<DocumentContent>;

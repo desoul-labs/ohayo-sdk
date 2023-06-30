@@ -6,7 +6,7 @@ import {
   useMutation,
 } from '@tanstack/react-query';
 import { Operation } from 'fast-json-patch';
-import { DocumentContent } from 'src/ceramic/types/shared';
+import { DocumentContent } from '../../types/shared';
 
 export type UsePatchDocumentArgs = {
   document: TileDocument<DocumentContent>;
