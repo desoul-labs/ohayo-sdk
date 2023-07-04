@@ -42,7 +42,7 @@ const mutationFn: MutationFunction<
 };
 
 export const useCreateDocument = ({
-  content,
+  content: content_,
   family,
   tags,
   schema,
@@ -67,13 +67,13 @@ export const useCreateDocument = ({
   );
 
   const create = (
-    content_: DocumentContent,
+    content: DocumentContent,
     metadata?: TileMetadataArgs,
     options?: CreateOpts,
   ) =>
     mutate({
       client,
-      content: content ?? content_,
+      content: content_ ?? content,
       opts: opts ?? options,
       family,
       tags,
@@ -83,13 +83,13 @@ export const useCreateDocument = ({
     });
 
   const createAsync = async (
-    content_: DocumentContent,
+    content: DocumentContent,
     metadata?: TileMetadataArgs,
     options?: CreateOpts,
   ) =>
     await mutateAsync({
       client,
-      content: content ?? content_,
+      content: content_ ?? content,
       opts: opts ?? options,
       family,
       tags,

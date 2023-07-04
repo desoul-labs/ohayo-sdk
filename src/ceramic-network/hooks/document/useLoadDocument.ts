@@ -10,30 +10,31 @@ import {
 import { DocumentContent } from '../../types/shared';
 import { useCeramicContext } from '../useCeramicContext';
 
-export type UseDocumentArgs = {
+export type UseLoadDocumentArgs = {
   streamId: string | StreamID | CommitID;
   opts?: LoadOpts;
 };
 
-export type DocumentResult = {
+export type LoadDocumentResult = {
   document: TileDocument<DocumentContent>;
 };
 
 export type UseDocumentConfig = UseQueryOptions<
-  DocumentResult,
+  LoadDocumentResult,
   Error,
-  DocumentResult,
+  LoadDocumentResult,
   ReturnType<typeof queryKey>
 >;
 
-type QueryArgs = UseDocumentArgs & {
+type QueryArgs = UseLoadDocumentArgs & {
   client: CeramicClient;
 };
 
-const queryKey = (args: QueryArgs) => ['ceramic', 'document', args] as const;
+const queryKey = (args: QueryArgs) =>
+  ['ceramic', 'load-document', args] as const;
 
 const queryFn: QueryFunction<
-  DocumentResult,
+  LoadDocumentResult,
   ReturnType<typeof queryKey>
 > = async ({ queryKey: [, , { client, streamId, opts }] }) => {
   return {
@@ -45,7 +46,7 @@ export const useLoadDocument = ({
   streamId,
   opts,
   ...config
-}: UseDocumentArgs & UseDocumentConfig) => {
+}: UseLoadDocumentArgs & UseDocumentConfig) => {
   const { client } = useCeramicContext();
 
   const qryKey = queryKey({ client, streamId, opts });
