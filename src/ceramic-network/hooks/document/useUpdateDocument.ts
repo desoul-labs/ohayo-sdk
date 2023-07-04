@@ -1,4 +1,5 @@
 import { UpdateOpts } from '@ceramicnetwork/common';
+import { CeramicClient } from '@ceramicnetwork/http-client';
 import { TileDocument, TileMetadataArgs } from '@ceramicnetwork/stream-tile';
 import {
   MutationFunction,
@@ -6,10 +7,10 @@ import {
   useMutation,
 } from '@tanstack/react-query';
 import { DocumentContent } from '../../types/shared';
+import { useCeramicContext } from '../useCeramicContext';
 
-export type UseUpdateDocumentArgs = {
-  document: TileDocument<DocumentContent>;
-} & Partial<{
+export type UseUpdateDocumentArgs = Partial<{
+  streamId: string;
   setContent: (content: DocumentContent) => DocumentContent;
   setMetadata: (metadata: TileMetadataArgs) => TileMetadataArgs | undefined;
   opts: UpdateOpts;
@@ -21,33 +22,47 @@ export type UseUpdateDocumentConfig = UseMutationOptions<
   UseUpdateDocumentArgs
 >;
 
-type MutationArgs = UseUpdateDocumentArgs;
+type MutationArgs = UseUpdateDocumentArgs & {
+  client: CeramicClient;
+};
 
 const mutationKey = (args: MutationArgs) =>
   ['ceramic', 'update-document', args] as const;
 
 const mutationFn: MutationFunction<void, MutationArgs> = async ({
-  document,
+  client,
+  streamId,
   setContent,
   setMetadata,
   opts,
 }) => {
+  if (!streamId) {
+    throw new Error('Missing streamId');
+  }
+
+  const document: TileDocument<DocumentContent> = await TileDocument.load(
+    client,
+    streamId,
+  );
   const content = setContent?.(document.content);
   const metadata = setMetadata?.(document.metadata);
   await document.update(content, metadata, opts);
 };
 
 export const useUpdateDocument = ({
-  document,
-  setContent,
-  setMetadata,
+  streamId: streamId_,
+  setContent: setContent_,
+  setMetadata: setMetadata_,
   opts,
   ...config
 }: UseUpdateDocumentArgs & UseUpdateDocumentConfig) => {
+  const { client } = useCeramicContext();
+
   const mutKey = mutationKey({
-    document,
-    setContent,
-    setMetadata,
+    client,
+    streamId: streamId_,
+    setContent: setContent_,
+    setMetadata: setMetadata_,
     opts,
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(
@@ -57,26 +72,30 @@ export const useUpdateDocument = ({
   );
 
   const update = (
-    setContent_: (content: DocumentContent) => DocumentContent,
-    setMetadata_: (metadata: TileMetadataArgs) => TileMetadataArgs | undefined,
+    streamId: string,
+    setContent?: (content: DocumentContent) => DocumentContent,
+    setMetadata?: (metadata: TileMetadataArgs) => TileMetadataArgs,
     options?: UpdateOpts,
   ) =>
     mutate({
-      document,
-      setContent: setContent ?? setContent_,
-      setMetadata: setMetadata ?? setMetadata_,
+      client,
+      streamId,
+      setContent: setContent_ ?? setContent,
+      setMetadata: setMetadata_ ?? setMetadata,
       opts: opts ?? options,
     });
 
   const updateAsync = async (
-    setContent_: (content: DocumentContent) => DocumentContent,
-    setMetadata_: (metadata: TileMetadataArgs) => TileMetadataArgs | undefined,
+    streamId: string,
+    setContent?: (content: DocumentContent) => DocumentContent,
+    setMetadata?: (metadata: TileMetadataArgs) => TileMetadataArgs,
     options?: UpdateOpts,
   ) =>
     await mutateAsync({
-      document,
-      setContent: setContent ?? setContent_,
-      setMetadata: setMetadata ?? setMetadata_,
+      client,
+      streamId,
+      setContent: setContent_ ?? setContent,
+      setMetadata: setMetadata_ ?? setMetadata,
       opts: opts ?? options,
     });
 

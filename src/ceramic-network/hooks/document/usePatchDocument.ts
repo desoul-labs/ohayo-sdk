@@ -1,4 +1,5 @@
 import { UpdateOpts } from '@ceramicnetwork/common';
+import { CeramicClient } from '@ceramicnetwork/http-client';
 import { TileDocument } from '@ceramicnetwork/stream-tile';
 import {
   MutationFunction,
@@ -6,11 +7,10 @@ import {
   useMutation,
 } from '@tanstack/react-query';
 import { Operation } from 'fast-json-patch';
-import { DocumentContent } from '../../types/shared';
+import { useCeramicContext } from '../useCeramicContext';
 
-export type UsePatchDocumentArgs = {
-  document: TileDocument<DocumentContent>;
-} & Partial<{
+export type UsePatchDocumentArgs = Partial<{
+  streamId: string;
   operations: Operation[];
   opts: UpdateOpts;
 }>;
@@ -21,26 +21,42 @@ export type UsePatchDocumentConfig = UseMutationOptions<
   UsePatchDocumentArgs
 >;
 
-type MutationArgs = UsePatchDocumentArgs;
+type MutationArgs = UsePatchDocumentArgs & {
+  client: CeramicClient;
+};
 
 const mutationKey = (args: MutationArgs) =>
   ['ceramic', 'patch-document', args] as const;
 
 const mutationFn: MutationFunction<void, MutationArgs> = async ({
-  document,
+  client,
+  streamId,
   operations,
   opts,
-}) => await document.patch(operations ?? [], opts);
+}) => {
+  if (!streamId) {
+    throw new Error('Missing streamId');
+  }
+  if (!operations) {
+    throw new Error('Missing operations');
+  }
+
+  const document = await TileDocument.load(client, streamId);
+  await document.patch(operations, opts);
+};
 
 export const usePatchDocument = ({
-  document,
-  operations,
+  streamId: streamId_,
+  operations: operations_,
   opts,
   ...config
 }: UsePatchDocumentArgs & UsePatchDocumentConfig) => {
+  const { client } = useCeramicContext();
+
   const mutKey = mutationKey({
-    document,
-    operations,
+    client,
+    streamId: streamId_,
+    operations: operations_,
     opts,
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(
@@ -49,16 +65,26 @@ export const usePatchDocument = ({
     config,
   );
 
-  const patch = (operations_: Operation[], options?: UpdateOpts) =>
+  const patch = (
+    streamId: string,
+    operations: Operation[],
+    options?: UpdateOpts,
+  ) =>
     mutate({
-      document,
-      operations: operations ?? operations_,
+      client,
+      streamId: streamId ?? streamId_,
+      operations: operations_ ?? operations,
       opts: opts ?? options,
     });
 
-  const patchAsync = async (operations_: Operation[], options?: UpdateOpts) =>
+  const patchAsync = async (
+    streamId: string,
+    operations: Operation[],
+    options?: UpdateOpts,
+  ) =>
     await mutateAsync({
-      document,
+      client,
+      streamId: streamId ?? streamId_,
       operations: operations ?? operations_,
       opts: opts ?? options,
     });
