@@ -19,7 +19,7 @@ export type LoadDocumentResult = {
   document: TileDocument<DocumentContent>;
 };
 
-export type UseDocumentConfig = UseQueryOptions<
+export type UseLoadDocumentConfig = UseQueryOptions<
   LoadDocumentResult,
   Error,
   LoadDocumentResult,
@@ -46,7 +46,7 @@ export const useLoadDocument = ({
   streamId,
   opts,
   ...config
-}: UseLoadDocumentArgs & UseDocumentConfig) => {
+}: UseLoadDocumentArgs & UseLoadDocumentConfig) => {
   const { client } = useCeramicContext();
 
   const qryKey = queryKey({ client, streamId, opts });
