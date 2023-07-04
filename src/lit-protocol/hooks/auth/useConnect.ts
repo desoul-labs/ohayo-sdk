@@ -1,3 +1,4 @@
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
   AuthCallback,
@@ -33,12 +34,14 @@ export type UseConnectConfig = UseMutationOptions<
 
 type MutationArgs = {
   client: LitNodeClient;
+  setContracts: (contracts: LitContracts) => void;
 } & UseConnectArgs;
 
 const mutationKey = (args: MutationArgs) => ['lit', 'connect', args] as const;
 
 const mutationFn: MutationFunction<ConnectResult, MutationArgs> = async ({
   client,
+  setContracts,
   signer,
   opts,
 }) => {
@@ -81,6 +84,10 @@ const mutationFn: MutationFunction<ConnectResult, MutationArgs> = async ({
     ...opts,
   });
 
+  const contracts = new LitContracts({ signer });
+  await contracts.connect();
+  setContracts(contracts);
+
   return {
     sessionKey,
     sessionSigs,
@@ -88,13 +95,14 @@ const mutationFn: MutationFunction<ConnectResult, MutationArgs> = async ({
 };
 
 export const useConnect = ({
-  signer,
+  signer: signer_,
   opts,
   ...config
 }: UseConnectArgs & UseConnectConfig = {}) => {
-  const { client, sessionKey, setSessionKey, setSessionSigs } = useLitContext();
+  const { client, setContracts, sessionKey, setSessionKey, setSessionSigs } =
+    useLitContext();
 
-  const mutKey = mutationKey({ client, signer, opts });
+  const mutKey = mutationKey({ client, setContracts, signer: signer_, opts });
   const { mutate, mutateAsync, ...mutation } = useMutation(mutKey, mutationFn, {
     ...config,
     onSuccess: (data, variables, option) => {
@@ -106,10 +114,11 @@ export const useConnect = ({
     },
   });
 
-  const connect = (signer_?: Signer, options?: GetSessionSigsProps) =>
+  const connect = (signer?: Signer, options?: GetSessionSigsProps) =>
     mutate({
       client,
-      signer: signer ?? signer_,
+      setContracts,
+      signer: signer_ ?? signer,
       opts: {
         sessionKey,
         ...options,
@@ -117,13 +126,11 @@ export const useConnect = ({
       },
     });
 
-  const connectAsync = async (
-    signer_?: Signer,
-    options?: GetSessionSigsProps,
-  ) =>
+  const connectAsync = async (signer?: Signer, options?: GetSessionSigsProps) =>
     await mutateAsync({
       client,
-      signer: signer ?? signer_,
+      setContracts,
+      signer: signer_ ?? signer,
       opts: {
         sessionKey,
         ...options,

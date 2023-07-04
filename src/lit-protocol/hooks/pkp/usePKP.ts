@@ -6,52 +6,6 @@ import { ContractTransaction, Signer } from 'ethers';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { LitContext } from '../../contexts/LitContext';
 
-export const useMintPKP = () => {
-  const [isPending, setIsPending] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
-
-  const [error, setError] = useState<Error | null>(null);
-  const [pkpId, setPkpId] = useState<string>();
-  const [pubKey, setPubKey] = useState<string>();
-
-  const mint = useCallback(async (signer: Signer) => {
-    setIsPending(true);
-    try {
-      const contracts = new LitContracts({ signer });
-      await contracts.connect();
-
-      const { tokenId: id } = await contracts.pkpNftContractUtil.write.mint();
-      setPkpId(id);
-      const pk = await (contracts.pkpNftContract.read as PKPNFT).getPubkey(id);
-      setPubKey(pk);
-
-      setIsSuccess(true);
-      return {
-        pkpId: id,
-        pubKey: pk,
-      };
-    } catch (e) {
-      if (e instanceof Error) {
-        setIsError(true);
-        setError(e);
-      }
-    } finally {
-      setIsPending(false);
-    }
-  }, []);
-
-  return {
-    mint,
-    pkpId,
-    pubKey,
-    isPending,
-    isSuccess,
-    isError,
-    error,
-  };
-};
-
 export const usePKPTransfer = (pkpId: string) => {
   const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);

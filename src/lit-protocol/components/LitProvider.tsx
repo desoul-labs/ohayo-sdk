@@ -1,3 +1,4 @@
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
   LitNodeClientConfig,
@@ -19,16 +20,19 @@ export const LitProvider: React.FC<
 
   const [sessionKey, setSessionKey] = useState<SessionKeyPair>();
   const [sessionSigs, setSessionSigs] = useState<SessionSigsMap>();
+  const [contracts, setContracts] = useState<LitContracts>();
 
   const value = useMemo(
     () => ({
       client,
+      contracts,
+      setContracts,
       setSessionSigs,
       sessionSigs,
       sessionKey,
       setSessionKey,
     }),
-    [client, sessionKey, sessionSigs],
+    [client, contracts, sessionKey, sessionSigs],
   );
 
   return <LitContext.Provider value={value}>{children}</LitContext.Provider>;

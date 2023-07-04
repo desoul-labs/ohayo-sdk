@@ -26,7 +26,7 @@ type MutationArgs = UseRemoveCAIP10LinkArgs & {
 };
 
 const mutationKey = (args: MutationArgs) =>
-  ['ceramic', 'create-caip10-link', args] as const;
+  ['ceramic', 'remove-caip10-link', args] as const;
 
 const mutationFn: MutationFunction<void, MutationArgs> = async ({
   client,

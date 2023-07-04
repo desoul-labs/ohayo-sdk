@@ -29,7 +29,8 @@ type QueryArgs = UseLoadCAIP10LinkArgs & {
   client: CeramicClient;
 };
 
-const queryKey = (args: QueryArgs) => ['ceramic', 'document', args] as const;
+const queryKey = (args: QueryArgs) =>
+  ['ceramic', 'load-caip10-link', args] as const;
 
 const queryFn: QueryFunction<
   LoadCAIP10LinkResult,

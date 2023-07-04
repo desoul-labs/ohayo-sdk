@@ -1,24 +1,12 @@
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import {
-  GetSessionSigsProps,
-  SessionKeyPair,
-  SessionSigsMap,
-} from '@lit-protocol/types';
+import { SessionKeyPair, SessionSigsMap } from '@lit-protocol/types';
 import { createContext } from 'react';
-import { O } from 'ts-toolbelt';
-
-export type InitClientOptions = O.Undefinable<
-  GetSessionSigsProps,
-  'expiration' | 'sessionKey'
->;
-
-export type InitClientResults = {
-  client: LitNodeClient;
-  sessionSigs: SessionSigsMap;
-};
 
 export type LitContextValue = {
-  client?: LitNodeClient | undefined;
+  client?: LitNodeClient;
+  contracts?: LitContracts;
+  setContracts: (contracts?: LitContracts) => void;
   sessionSigs?: SessionSigsMap;
   setSessionSigs: (sessionSigs?: SessionSigsMap) => void;
   sessionKey?: SessionKeyPair;
@@ -27,6 +15,8 @@ export type LitContextValue = {
 
 export const LitContext = createContext<LitContextValue>({
   client: undefined,
+  contracts: undefined,
+  setContracts: () => {},
   sessionSigs: undefined,
   setSessionSigs: () => {},
   sessionKey: undefined,
