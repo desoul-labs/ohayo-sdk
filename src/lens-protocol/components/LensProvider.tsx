@@ -1,1 +1,1 @@
-export { LensProvider } from '@lens-protocol/react';
+export * from '@lens-protocol/react/dist/declarations/src/LensProvider';
