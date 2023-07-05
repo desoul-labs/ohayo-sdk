@@ -54,7 +54,7 @@ const mutationFn: MutationFunction<
 export const useCreateCAIP10Link = ({
   opts,
   ...config
-}: UseCreateCAIP10LinkArgs & UseCreateCAIP10LinkConfig) => {
+}: UseCreateCAIP10LinkArgs & UseCreateCAIP10LinkConfig = {}) => {
   const { client, signer } = useCeramicContext();
 
   if (!signer) {
@@ -68,12 +68,12 @@ export const useCreateCAIP10Link = ({
     config,
   );
 
-  const create = (options?: CreateOpts) => {
-    return mutate({ client, signer, opts: opts ?? options });
+  const create = (args: UseCreateCAIP10LinkArgs = {}) => {
+    return mutate({ client, signer, opts: opts ?? args.opts });
   };
 
-  const createAsync = async (options?: CreateOpts) => {
-    return mutateAsync({ client, signer, opts: opts ?? options });
+  const createAsync = async (args: UseCreateCAIP10LinkArgs = {}) => {
+    return mutateAsync({ client, signer, opts: opts ?? args.opts });
   };
 
   return {

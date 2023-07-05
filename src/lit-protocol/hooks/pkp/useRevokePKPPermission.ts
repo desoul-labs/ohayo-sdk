@@ -62,9 +62,9 @@ const mutationFn: MutationFunction<
 };
 
 export const useRevokePKPPermission = ({
-  pkpId: pkpId_,
-  user: user_,
-  action: action_,
+  pkpId,
+  user,
+  action,
   ...config
 }: UseRevokePKPPermissionArgs & UseRevokePKPPermissionConfig = {}) => {
   const { contracts } = useLitContext();
@@ -74,9 +74,9 @@ export const useRevokePKPPermission = ({
 
   const mutKey = mutationKey({
     contracts,
-    pkpId: pkpId_,
-    user: user_,
-    action: action_,
+    pkpId,
+    user,
+    action,
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(
     mutKey,
@@ -84,32 +84,36 @@ export const useRevokePKPPermission = ({
     config,
   );
 
-  const revokeUser = (pkpId: string, user: string) =>
+  const revokeUser = (args: Omit<UseRevokePKPPermissionArgs, 'action'> = {}) =>
     mutate({
       contracts,
-      pkpId: pkpId_ ?? pkpId,
-      user: user_ ?? user,
+      pkpId: pkpId ?? args.pkpId,
+      user: user ?? args.user,
     });
 
-  const revokeUserAsync = async (pkpId: string, user: string) =>
+  const revokeUserAsync = async (
+    args: Omit<UseRevokePKPPermissionArgs, 'action'> = {},
+  ) =>
     await mutateAsync({
       contracts,
-      pkpId: pkpId_ ?? pkpId,
-      user: user_ ?? user,
+      pkpId: pkpId ?? args.pkpId,
+      user: user ?? args.user,
     });
 
-  const revokeAction = (pkpId: string, action: string) =>
+  const revokeAction = (args: Omit<UseRevokePKPPermissionArgs, 'user'> = {}) =>
     mutate({
       contracts,
-      pkpId: pkpId_ ?? pkpId,
-      action: action_ ?? action,
+      pkpId: pkpId ?? args.pkpId,
+      action: action ?? args.action,
     });
 
-  const revokeActionAsync = async (pkpId: string, action: string) =>
+  const revokeActionAsync = async (
+    args: Omit<UseRevokePKPPermissionArgs, 'user'> = {},
+  ) =>
     await mutateAsync({
       contracts,
-      pkpId: pkpId_ ?? pkpId,
-      action: action_ ?? action,
+      pkpId: pkpId ?? args.pkpId,
+      action: action ?? args.action,
     });
 
   return {

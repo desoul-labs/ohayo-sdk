@@ -50,19 +50,19 @@ const mutationFn: MutationFunction<void, MutationArgs> = async ({
 };
 
 export const useUpdateDocument = ({
-  streamId: streamId_,
-  setContent: setContent_,
-  setMetadata: setMetadata_,
+  streamId,
+  setContent,
+  setMetadata,
   opts,
   ...config
-}: UseUpdateDocumentArgs & UseUpdateDocumentConfig) => {
+}: UseUpdateDocumentArgs & UseUpdateDocumentConfig = {}) => {
   const { client } = useCeramicContext();
 
   const mutKey = mutationKey({
     client,
-    streamId: streamId_,
-    setContent: setContent_,
-    setMetadata: setMetadata_,
+    streamId,
+    setContent,
+    setMetadata,
     opts,
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(
@@ -71,32 +71,22 @@ export const useUpdateDocument = ({
     config,
   );
 
-  const update = (
-    streamId: string,
-    setContent?: (content: DocumentContent) => DocumentContent,
-    setMetadata?: (metadata: TileMetadataArgs) => TileMetadataArgs,
-    options?: UpdateOpts,
-  ) =>
+  const update = (args: UseUpdateDocumentArgs = {}) =>
     mutate({
       client,
-      streamId,
-      setContent: setContent_ ?? setContent,
-      setMetadata: setMetadata_ ?? setMetadata,
-      opts: opts ?? options,
+      streamId: streamId ?? args.streamId,
+      setContent: setContent ?? args.setContent,
+      setMetadata: setMetadata ?? args.setMetadata,
+      opts: opts ?? args.opts,
     });
 
-  const updateAsync = async (
-    streamId: string,
-    setContent?: (content: DocumentContent) => DocumentContent,
-    setMetadata?: (metadata: TileMetadataArgs) => TileMetadataArgs,
-    options?: UpdateOpts,
-  ) =>
+  const updateAsync = async (args: UseUpdateDocumentArgs = {}) =>
     await mutateAsync({
       client,
-      streamId,
-      setContent: setContent_ ?? setContent,
-      setMetadata: setMetadata_ ?? setMetadata,
-      opts: opts ?? options,
+      streamId: streamId ?? args.streamId,
+      setContent: setContent ?? args.setContent,
+      setMetadata: setMetadata ?? args.setMetadata,
+      opts: opts ?? args.opts,
     });
 
   return {

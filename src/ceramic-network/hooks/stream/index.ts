@@ -1,2 +1,2 @@
 export * from './useMultiQuery';
-export * from './useStream';
+export * from './useLoadStream';

@@ -95,14 +95,14 @@ const mutationFn: MutationFunction<ConnectResult, MutationArgs> = async ({
 };
 
 export const useConnect = ({
-  signer: signer_,
+  signer,
   opts,
   ...config
 }: UseConnectArgs & UseConnectConfig = {}) => {
   const { client, setContracts, sessionKey, setSessionKey, setSessionSigs } =
     useLitContext();
 
-  const mutKey = mutationKey({ client, setContracts, signer: signer_, opts });
+  const mutKey = mutationKey({ client, setContracts, signer, opts });
   const { mutate, mutateAsync, ...mutation } = useMutation(mutKey, mutationFn, {
     ...config,
     onSuccess: (data, variables, option) => {
@@ -114,27 +114,25 @@ export const useConnect = ({
     },
   });
 
-  const connect = (signer?: Signer, options?: GetSessionSigsProps) =>
+  const connect = (args: UseConnectArgs = {}) =>
     mutate({
       client,
       setContracts,
-      signer: signer_ ?? signer,
+      signer: signer ?? args.signer,
       opts: {
         sessionKey,
-        ...options,
-        ...opts,
+        ...(opts ?? args.opts),
       },
     });
 
-  const connectAsync = async (signer?: Signer, options?: GetSessionSigsProps) =>
+  const connectAsync = async (args: UseConnectArgs = {}) =>
     await mutateAsync({
       client,
       setContracts,
-      signer: signer_ ?? signer,
+      signer: signer ?? args.signer,
       opts: {
         sessionKey,
-        ...options,
-        ...opts,
+        ...(opts ?? args.opts),
       },
     });
 

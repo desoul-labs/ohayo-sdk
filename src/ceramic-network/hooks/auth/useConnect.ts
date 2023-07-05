@@ -70,7 +70,7 @@ const mutationFn: MutationFunction<ConnectResult, MutationArgs> = async ({
 };
 
 export const useConnect = ({
-  signer: signer_,
+  signer,
   opts,
   ...config
 }: UseConnectArgs & UseConnectConfig = {}) => {
@@ -78,7 +78,7 @@ export const useConnect = ({
 
   const mutKey = mutationKey({
     client,
-    signer: signer_,
+    signer,
     opts: {
       session,
       ...opts,
@@ -94,25 +94,23 @@ export const useConnect = ({
     },
   });
 
-  const connect = (signer?: Signer, options?: ConnectOptions) =>
+  const connect = (args: UseConnectArgs = {}) =>
     mutate({
       client,
-      signer: signer_ ?? signer,
+      signer: signer ?? args.signer,
       opts: {
         session,
-        ...options,
-        ...opts,
+        ...(opts ?? args.opts),
       },
     });
 
-  const connectAsync = async (signer?: Signer, options?: ConnectOptions) =>
+  const connectAsync = async (args: UseConnectArgs = {}) =>
     await mutateAsync({
       client,
-      signer: signer_ ?? signer,
+      signer: signer ?? args.signer,
       opts: {
         session,
-        ...options,
-        ...opts,
+        ...(opts ?? args.opts),
       },
     });
 

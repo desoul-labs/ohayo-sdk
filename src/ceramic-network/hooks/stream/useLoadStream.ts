@@ -8,30 +8,30 @@ import {
 } from '@tanstack/react-query';
 import { useCeramicContext } from '../useCeramicContext';
 
-export type UseStreamArgs = {
+export type UseLoadStreamArgs = {
   streamId: string | StreamID | CommitID;
   opts?: LoadOpts;
 };
 
-export type StreamResult = {
+export type LoadStreamResult = {
   stream: Stream;
 };
 
-export type UseStreamConfig = UseQueryOptions<
-  StreamResult,
+export type UseLoadStreamConfig = UseQueryOptions<
+  LoadStreamResult,
   Error,
-  StreamResult,
+  LoadStreamResult,
   ReturnType<typeof queryKey>
 >;
 
-type QueryArgs = UseStreamArgs & {
+type QueryArgs = UseLoadStreamArgs & {
   client: CeramicClient;
 };
 
 const queryKey = (args: QueryArgs) => ['ceramic', 'stream', args] as const;
 
 const queryFn: QueryFunction<
-  StreamResult,
+  LoadStreamResult,
   ReturnType<typeof queryKey>
 > = async ({ queryKey: [, , { client, streamId, opts }] }) => {
   return {
@@ -39,11 +39,11 @@ const queryFn: QueryFunction<
   };
 };
 
-export const useStream = ({
+export const useLoadStream = ({
   streamId,
   opts,
   ...config
-}: UseStreamArgs & UseStreamConfig) => {
+}: UseLoadStreamArgs & UseLoadStreamConfig) => {
   const { client } = useCeramicContext();
 
   const qryKey = queryKey({ client, streamId, opts });

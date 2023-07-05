@@ -9,10 +9,10 @@ import {
 import { DocumentContent } from '../../types/shared';
 import { useCeramicContext } from '../useCeramicContext';
 
-export type UseDeterministicDocumentArgs = Omit<
-  TileMetadataArgs,
-  'deterministic'
-> & { opts?: CreateOpts };
+export type UseDeterministicDocumentArgs = Partial<{
+  metadata: Omit<TileMetadataArgs, 'deterministic'>;
+  opts: CreateOpts;
+}>;
 
 export type DeterministicDocumentResult = {
   document: TileDocument<DocumentContent>;
@@ -34,21 +34,18 @@ const mutationKey = (args: MutationArgs) =>
 const mutationFn: MutationFunction<
   DeterministicDocumentResult,
   MutationArgs
-> = async ({ client, opts, ...metadata }) => {
+> = async ({ client, opts, metadata }) => {
   return {
     document: await TileDocument.deterministic<DocumentContent>(
       client,
-      metadata,
+      metadata ?? {},
       opts,
     ),
   };
 };
 
 export const useDeterministicDocument = ({
-  family,
-  tags,
-  schema,
-  forbidControllerChange,
+  metadata,
   opts,
   ...config
 }: UseDeterministicDocumentArgs & UseDeterministicDocumentConfig = {}) => {
@@ -56,10 +53,7 @@ export const useDeterministicDocument = ({
 
   const mutKey = mutationKey({
     client,
-    family,
-    tags,
-    schema,
-    forbidControllerChange,
+    metadata,
     opts,
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(
@@ -68,32 +62,18 @@ export const useDeterministicDocument = ({
     config,
   );
 
-  const createOrLoad = (
-    metadata?: Omit<TileMetadataArgs, 'deterministic'>,
-    options?: CreateOpts,
-  ) =>
+  const createOrLoad = (args: UseDeterministicDocumentArgs = {}) =>
     mutate({
       client,
-      opts: opts ?? options,
-      family,
-      tags,
-      schema,
-      forbidControllerChange,
-      ...metadata,
+      metadata: metadata ?? args.metadata,
+      opts: opts ?? args.opts,
     });
 
-  const createOrLoadAsync = async (
-    metadata?: Omit<TileMetadataArgs, 'deterministic'>,
-    options?: CreateOpts,
-  ) =>
+  const createOrLoadAsync = async (args: UseDeterministicDocumentArgs = {}) =>
     await mutateAsync({
       client,
-      opts: opts ?? options,
-      family,
-      tags,
-      schema,
-      forbidControllerChange,
-      ...metadata,
+      metadata: metadata ?? args.metadata,
+      opts: opts ?? args.opts,
     });
 
   return {

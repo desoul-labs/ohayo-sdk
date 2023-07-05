@@ -62,9 +62,9 @@ const mutationFn: MutationFunction<
 };
 
 export const useGrantPKPPermission = ({
-  pkpId: pkpId_,
-  user: user_,
-  action: action_,
+  pkpId,
+  user,
+  action,
   ...config
 }: UseGrantPKPPermissionArgs & UseGrantPKPPermissionConfig = {}) => {
   const { contracts } = useLitContext();
@@ -74,9 +74,9 @@ export const useGrantPKPPermission = ({
 
   const mutKey = mutationKey({
     contracts,
-    pkpId: pkpId_,
-    user: user_,
-    action: action_,
+    pkpId,
+    user,
+    action,
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(
     mutKey,
@@ -84,32 +84,36 @@ export const useGrantPKPPermission = ({
     config,
   );
 
-  const grantUser = (pkpId: string, user: string) =>
+  const grantUser = (args: Omit<UseGrantPKPPermissionArgs, 'action'> = {}) =>
     mutate({
       contracts,
-      pkpId: pkpId_ ?? pkpId,
-      user: user_ ?? user,
+      pkpId: pkpId ?? args.pkpId,
+      user: user ?? args.user,
     });
 
-  const grantUserAsync = async (pkpId: string, user: string) =>
+  const grantUserAsync = async (
+    args: Omit<UseGrantPKPPermissionArgs, 'action'> = {},
+  ) =>
     await mutateAsync({
       contracts,
-      pkpId: pkpId_ ?? pkpId,
-      user: user_ ?? user,
+      pkpId: pkpId ?? args.pkpId,
+      user: user ?? args.user,
     });
 
-  const grantAction = (pkpId: string, action: string) =>
+  const grantAction = (args: Omit<UseGrantPKPPermissionArgs, 'user'> = {}) =>
     mutate({
       contracts,
-      pkpId: pkpId_ ?? pkpId,
-      action: action_ ?? action,
+      pkpId: pkpId ?? args.pkpId,
+      action: action ?? args.action,
     });
 
-  const grantActionAsync = async (pkpId: string, action: string) =>
+  const grantActionAsync = async (
+    args: Omit<UseGrantPKPPermissionArgs, 'user'> = {},
+  ) =>
     await mutateAsync({
       contracts,
-      pkpId: pkpId_ ?? pkpId,
-      action: action_ ?? action,
+      pkpId: pkpId ?? args.pkpId,
+      action: action ?? args.action,
     });
 
   return {

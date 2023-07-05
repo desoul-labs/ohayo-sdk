@@ -9,11 +9,11 @@ import {
 import { DocumentContent } from '../../types/shared';
 import { useCeramicContext } from '../useCeramicContext';
 
-export type UseCreateDocumentArgs = TileMetadataArgs &
-  Partial<{
-    content: DocumentContent;
-    opts: CreateOpts;
-  }>;
+export type UseCreateDocumentArgs = Partial<{
+  metadata: TileMetadataArgs;
+  content: DocumentContent;
+  opts: CreateOpts;
+}>;
 
 export type CreateDocumentResult = {
   document: TileDocument<DocumentContent>;
@@ -35,18 +35,15 @@ const mutationKey = (args: MutationArgs) =>
 const mutationFn: MutationFunction<
   CreateDocumentResult,
   MutationArgs
-> = async ({ client, content, opts, ...metadata }) => {
+> = async ({ client, content, metadata, opts }) => {
   return {
     document: await TileDocument.create(client, content, metadata, opts),
   };
 };
 
 export const useCreateDocument = ({
-  content: content_,
-  family,
-  tags,
-  schema,
-  forbidControllerChange,
+  content,
+  metadata,
   opts,
   ...config
 }: UseCreateDocumentArgs & UseCreateDocumentConfig = {}) => {
@@ -54,10 +51,8 @@ export const useCreateDocument = ({
 
   const mutKey = mutationKey({
     client,
-    family,
-    tags,
-    schema,
-    forbidControllerChange,
+    content,
+    metadata,
     opts,
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(
@@ -66,36 +61,20 @@ export const useCreateDocument = ({
     config,
   );
 
-  const create = (
-    content: DocumentContent,
-    metadata?: TileMetadataArgs,
-    options?: CreateOpts,
-  ) =>
+  const create = (args: UseCreateDocumentArgs = {}) =>
     mutate({
       client,
-      content: content_ ?? content,
-      opts: opts ?? options,
-      family,
-      tags,
-      schema,
-      forbidControllerChange,
-      ...metadata,
+      content: content ?? args.content,
+      opts: opts ?? args.opts,
+      metadata: metadata ?? args.metadata,
     });
 
-  const createAsync = async (
-    content: DocumentContent,
-    metadata?: TileMetadataArgs,
-    options?: CreateOpts,
-  ) =>
+  const createAsync = async (args: UseCreateDocumentArgs = {}) =>
     await mutateAsync({
       client,
-      content: content_ ?? content,
-      opts: opts ?? options,
-      family,
-      tags,
-      schema,
-      forbidControllerChange,
-      ...metadata,
+      content: content ?? args.content,
+      opts: opts ?? args.opts,
+      metadata: metadata ?? args.metadata,
     });
 
   return {

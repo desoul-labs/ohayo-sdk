@@ -54,8 +54,8 @@ const mutationFn: MutationFunction<TransferPKPResult, MutationArgs> = async ({
 };
 
 export const useTransferPKP = ({
-  to: to_,
-  pkpId: pkpId_,
+  to,
+  pkpId,
   ...config
 }: UseTransferPKPArgs & UseTransferPKPConfig = {}) => {
   const { contracts } = useLitContext();
@@ -63,18 +63,26 @@ export const useTransferPKP = ({
     throw new Error('Contracts not initialized');
   }
 
-  const mutKey = mutationKey({ contracts, to: to_, pkpId: pkpId_ });
+  const mutKey = mutationKey({ contracts, to, pkpId });
   const { mutate, mutateAsync, ...mutation } = useMutation(
     mutKey,
     mutationFn,
     config,
   );
 
-  const transfer = (to: string, pkpId: string) =>
-    mutate({ contracts, to, pkpId });
+  const transfer = (args: UseTransferPKPArgs = {}) =>
+    mutate({
+      contracts,
+      to: to ?? args.to,
+      pkpId: pkpId ?? args.pkpId,
+    });
 
-  const transferAsync = async (to: string, pkpId: string) =>
-    await mutateAsync({ contracts, to, pkpId });
+  const transferAsync = async (args: UseTransferPKPArgs = {}) =>
+    await mutateAsync({
+      contracts,
+      to: to ?? args.to,
+      pkpId: pkpId ?? args.pkpId,
+    });
 
   return {
     transfer,

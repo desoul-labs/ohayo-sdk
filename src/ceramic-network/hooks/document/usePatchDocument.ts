@@ -46,17 +46,17 @@ const mutationFn: MutationFunction<void, MutationArgs> = async ({
 };
 
 export const usePatchDocument = ({
-  streamId: streamId_,
-  operations: operations_,
+  streamId,
+  operations,
   opts,
   ...config
-}: UsePatchDocumentArgs & UsePatchDocumentConfig) => {
+}: UsePatchDocumentArgs & UsePatchDocumentConfig = {}) => {
   const { client } = useCeramicContext();
 
   const mutKey = mutationKey({
     client,
-    streamId: streamId_,
-    operations: operations_,
+    streamId,
+    operations,
     opts,
   });
   const { mutate, mutateAsync, ...mutation } = useMutation(
@@ -65,28 +65,20 @@ export const usePatchDocument = ({
     config,
   );
 
-  const patch = (
-    streamId: string,
-    operations: Operation[],
-    options?: UpdateOpts,
-  ) =>
+  const patch = (args: UsePatchDocumentArgs = {}) =>
     mutate({
       client,
-      streamId: streamId ?? streamId_,
-      operations: operations_ ?? operations,
-      opts: opts ?? options,
+      streamId: streamId ?? args.streamId,
+      operations: operations ?? args.operations,
+      opts: opts ?? args.opts,
     });
 
-  const patchAsync = async (
-    streamId: string,
-    operations: Operation[],
-    options?: UpdateOpts,
-  ) =>
+  const patchAsync = async (args: UsePatchDocumentArgs = {}) =>
     await mutateAsync({
       client,
-      streamId: streamId ?? streamId_,
-      operations: operations ?? operations_,
-      opts: opts ?? options,
+      streamId: streamId ?? args.streamId,
+      operations: operations ?? args.operations,
+      opts: opts ?? args.opts,
     });
 
   return {
